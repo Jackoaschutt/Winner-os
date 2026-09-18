@@ -8,9 +8,26 @@ import { TrendBadge } from "@/components/ui/TrendBadge";
 import { Button } from "@/components/ui/Button";
 import { formatCurrency, formatCompact, formatPct } from "@/lib/utils/format";
 import { useAppStore } from "@/lib/state/useAppStore";
-import { Eye, Radar, Sparkles, Layers } from "lucide-react";
+import { Eye, Radar, Sparkles, Layers, Crown, Award } from "lucide-react";
+import { cn } from "@/lib/utils/cn";
 
-export function ProductCard({ product }: { product: Product }) {
+/** Ranked "TOP 1 / TOP 2 / TOP 3" ribbon, Kalodata-style — first place gets a crown, 2nd/3rd a medal. */
+function RankRibbon({ rank }: { rank: number }) {
+  const Icon = rank === 1 ? Crown : Award;
+  return (
+    <div
+      className={cn(
+        "flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white shadow-lg",
+        rank === 1 ? "accent-gradient" : "bg-base-800/90 border border-white/15"
+      )}
+    >
+      <Icon size={11} className={rank === 1 ? "text-white" : "text-accent-soft"} />
+      Top {rank}
+    </div>
+  );
+}
+
+export function ProductCard({ product, rank }: { product: Product; rank?: number }) {
   const watchlisted = useAppStore((s) => s.isWatchlisted(product.id));
   const toggleWatchlist = useAppStore((s) => s.toggleWatchlist);
   const compareIds = useAppStore((s) => s.compareIds);
@@ -28,37 +45,41 @@ export function ProductCard({ product }: { product: Product }) {
           unoptimized
         />
         <div className="absolute left-2 top-2 flex flex-wrap gap-1.5">
-          <TrendBadge trend={product.trend} />
+          {rank && rank <= 3 ? <RankRibbon rank={rank} /> : <TrendBadge trend={product.trend} />}
         </div>
         <div className="absolute right-2 top-2">
-          <div className="rounded-full bg-black/50 p-1 backdrop-blur">
-            <ScoreRing score={product.opportunity.score} size={40} strokeWidth={3.5} />
+          <div className="rounded-full border border-white/10 bg-black/60 p-1 shadow-lg backdrop-blur-sm">
+            <ScoreRing score={product.opportunity.score} size={42} strokeWidth={3.5} />
           </div>
         </div>
       </Link>
       <div className="flex flex-1 flex-col p-4">
         <p className="mb-0.5 text-[11px] uppercase tracking-wide text-white/35">{product.category}</p>
-        <Link href={`/products/${product.id}`} className="mb-2 line-clamp-1 text-sm font-semibold text-white hover:text-accent-soft">
+        <Link href={`/products/${product.id}`} className="mb-1.5 line-clamp-1 text-sm font-semibold text-white hover:text-accent-soft">
           {product.name}
         </Link>
-        <div className="mb-3 flex items-center gap-3 text-xs text-white/50">
-          <span className="font-medium text-white/80">{formatCurrency(product.price)}</span>
-          <span>{formatCompact(product.revenue)} rev/mo</span>
-          <span className={product.growth >= 0 ? "text-good" : "text-bad"}>{formatPct(product.growth)}</span>
+        <div className="mb-3 flex items-center gap-2 text-sm">
+          <span className="font-semibold text-white">{formatCurrency(product.price, product.currency)}</span>
+          <span className={cn("text-xs font-medium", product.growth >= 0 ? "text-good" : "text-bad")}>
+            {formatPct(product.growth)}
+          </span>
         </div>
-        <div className="mb-4 grid grid-cols-3 gap-2 text-center text-[11px] text-white/40">
-          <div>
-            <p className="font-semibold text-white/80">{product.adCount}</p>
-            ads
+        <div className="mb-3 grid grid-cols-2 gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-center">
+          <div className="border-r border-white/10">
+            <p className="text-[10px] uppercase tracking-wide text-white/35">Revenue</p>
+            <p className="text-sm font-semibold text-white/85">{formatCompact(product.revenue)}</p>
           </div>
           <div>
-            <p className="font-semibold text-white/80">{product.storeCount}</p>
-            stores
+            <p className="text-[10px] uppercase tracking-wide text-white/35">Items Sold</p>
+            <p className="text-sm font-semibold text-white/85">{formatCompact(product.sales)}</p>
           </div>
-          <div>
-            <p className="font-semibold text-white/80">{product.daysTrending}d</p>
-            trending
-          </div>
+        </div>
+        <div className="mb-4 flex items-center justify-center gap-3 text-[11px] text-white/40">
+          <span>{product.adCount} ads</span>
+          <span className="text-white/15">·</span>
+          <span>{product.storeCount} stores</span>
+          <span className="text-white/15">·</span>
+          <span>{product.daysTrending}d trending</span>
         </div>
         <div className="mt-auto flex flex-wrap gap-1.5">
           <Button href={`/products/${product.id}`} size="sm" variant="secondary" className="flex-1">
