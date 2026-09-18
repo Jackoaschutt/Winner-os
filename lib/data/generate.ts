@@ -91,12 +91,13 @@ export function generateDemoDataset(): DemoDataset {
     momentum: rng.int(30, 95),
   }));
 
-  // ---- Products (5 per category x 20 = 100) ----
+  // ---- Products (real names/photos/prices where available, ~135 across 20 categories) ----
   const products: Product[] = [];
   CATEGORIES.forEach((cat, catIdx) => {
-    cat.items.forEach((itemName, itemIdx) => {
+    cat.items.forEach((item, itemIdx) => {
+      const itemName = item.name;
       const id = `prod_${catIdx + 1}_${itemIdx + 1}`;
-      const price = rng.float(cat.priceRange[0], cat.priceRange[1], 2);
+      const price = item.price ?? rng.float(cat.priceRange[0], cat.priceRange[1], 2);
       const marginPct = rng.float(0.55, 0.82); // gross margin before ads
       const supplierCost = Math.round(price * (1 - marginPct) * 100) / 100;
 
@@ -142,12 +143,12 @@ export function generateDemoDataset(): DemoDataset {
       const product: Product = {
         id,
         name: itemName,
-        image: `https://picsum.photos/seed/${id}/600/600`,
+        image: item.image,
         category: cat.name,
         categoryId: `cat_${catIdx + 1}`,
         price,
         supplierCost,
-        currency: "USD",
+        currency: "AUD",
         revenue,
         revenueTrend30d: growth,
         sales,
@@ -164,7 +165,7 @@ export function generateDemoDataset(): DemoDataset {
         launchDate: daysAgo(daysTrending + rng.int(10, 120)),
         createdAt: daysAgo(daysTrending),
         tags: [cat.name.split(" ")[0], trend, lifecycle],
-        description: `${itemName} — a ${cat.name.toLowerCase()} product currently showing ${trend} demand signals across paid social.`,
+        description: `${itemName} — a real, currently-trending ${cat.name.toLowerCase()} dropship product. Demand/growth signals below are modeled estimates.`,
         history: buildHistory(rng, growth, revenue / 30, sales / 30),
         reviewSignals: {
           topComplaints: rng.pickMany(OBJECTIONS, 2),
@@ -173,7 +174,7 @@ export function generateDemoDataset(): DemoDataset {
           commonObjections: rng.pickMany(OBJECTIONS, 2),
           customerLanguage: rng.pickMany(CUSTOMER_LANGUAGE, 4),
         },
-        dataLabel: "demo",
+        dataLabel: item.price ? "estimated" : "demo",
       };
       products.push(product);
       categories[catIdx].productCount += 1;
