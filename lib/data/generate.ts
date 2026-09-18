@@ -244,7 +244,7 @@ export function generateDemoDataset(): DemoDataset {
       brand: rng.pick(stores).name,
       platform: rng.pick(platforms),
       mediaType: rng.pick(formats),
-      thumbnail: `https://picsum.photos/seed/${`ad_${i + 1}`}/500/620`,
+      thumbnail: product.image,
       copy: `${rng.pick(HOOKS)} ${product.name} has been on repeat in my routine.`,
       headline: `${product.name} — ${rng.bool() ? "Selling Fast" : "Limited Restock"}`,
       cta: rng.pick(ctas),
