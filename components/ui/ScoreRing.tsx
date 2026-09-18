@@ -13,10 +13,14 @@ export function ScoreRing({
   strokeWidth?: number;
   showLabel?: boolean;
 }) {
+  const rounded = Math.round(score);
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
-  const offset = circumference * (1 - score / 100);
-  const color = score >= 70 ? "#3ddc97" : score >= 45 ? "#ffc857" : "#ff5a5a";
+  const offset = circumference * (1 - rounded / 100);
+  const color = rounded >= 70 ? "#3ddc97" : rounded >= 45 ? "#ffc857" : "#ff5a5a";
+  // Below this size the "/ 100" sublabel just crowds the number — drop it
+  // and center a single, slightly larger figure instead.
+  const compact = size < 56;
 
   return (
     <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
@@ -44,10 +48,13 @@ export function ScoreRing({
       </svg>
       {showLabel && (
         <div className="absolute flex flex-col items-center justify-center">
-          <span className={cn("text-lg font-semibold leading-none")} style={{ color }}>
-            {score}
+          <span
+            className={cn("font-semibold leading-none tabular-nums", compact ? "text-[13px]" : "text-lg")}
+            style={{ color }}
+          >
+            {rounded}
           </span>
-          <span className="mt-0.5 text-[9px] uppercase tracking-wide text-white/40">/ 100</span>
+          {!compact && <span className="mt-0.5 text-[9px] uppercase tracking-wide text-white/40">/ 100</span>}
         </div>
       )}
     </div>
