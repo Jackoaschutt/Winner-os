@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Ad, Platform, Product } from "@/types";
 import { AdCard } from "@/components/ads/AdCard";
+import { LiveMetaAds } from "@/components/ads/LiveMetaAds";
 import { Search } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
@@ -46,8 +47,12 @@ export function AdSpy({ ads, products, initialProductId }: { ads: Ad[]; products
     return pool;
   }, [ads, query, platform, minDays, productFilter, sortBy, productMap]);
 
+  const initialProduct = initialProductId ? productMap.get(initialProductId) : undefined;
+
   return (
     <div>
+      <LiveMetaAds initialQuery={initialProduct?.name || ""} />
+
       <div className="glass-panel mb-6 rounded-xl2 p-6 shadow-glass">
         <h1 className="mb-1 text-xl font-semibold text-white">Ad Spy</h1>
         <p className="mb-4 text-sm text-white/45">Search by product, brand, or keyword. Longevity is the strongest signal — an ad still running is an ad that's working.</p>
@@ -91,6 +96,7 @@ export function AdSpy({ ads, products, initialProductId }: { ads: Ad[]; products
         </div>
       </div>
 
+      <p className="mb-1 text-xs uppercase tracking-wide text-white/30">Estimated ad intelligence (demo dataset)</p>
       <p className="mb-3 text-sm text-white/45">{filtered.length} ads found</p>
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {filtered.map((ad) => (
